@@ -43,7 +43,7 @@ export function formGroups(participants: Participant[]): Group[] | null {
     if (i < leaders.length) {
       groups.push({
         id: `group-${i + 1}`,
-        name: `Group ${i + 1}`,
+        name: getRandomBibleBook(),
         participants: [leaders[i]],
         hasLeader: true
       });
