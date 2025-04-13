@@ -17,7 +17,7 @@ export default function JoinPageClient({ roomId }: JoinPageClientProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name.trim()) {
@@ -29,7 +29,7 @@ export default function JoinPageClient({ roomId }: JoinPageClientProps) {
     
     try {
       // Add the participant and get their ID
-      const participant = addParticipant(name.trim(), isWillingToLead);
+      const participant = await addParticipant(name.trim(), isWillingToLead);
       
       // Redirect to the participant's group page with the fixed roomId
       router.push(`/participant/sunday-group/${participant.id}`);

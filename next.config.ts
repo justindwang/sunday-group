@@ -1,11 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'export', // Static HTML export for Netlify
+  // Removed static export to support API routes
   images: {
-    unoptimized: true, // Required for static export
+    domains: ['localhost'],
   },
-  trailingSlash: true, // Helps with Netlify routing
 };
 
 export default nextConfig;

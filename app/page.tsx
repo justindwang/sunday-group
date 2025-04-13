@@ -13,6 +13,8 @@ export default function Home() {
     participants, 
     groups, 
     isGroupsFormed,
+    isLoading,
+    error,
     addParticipantManually, 
     formGroups, 
     resetGroups, 
@@ -27,13 +29,28 @@ export default function Home() {
     setJoinUrl(`${window.location.origin}/join/sunday-group`);
   }, []);
   
-  const handleFormGroups = () => {
-    const success = formGroups();
+  const handleFormGroups = async () => {
+    const success = await formGroups();
     if (!success) {
       setShowError(true);
       setTimeout(() => setShowError(false), 3000);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6">
+        <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+          <h2 className="text-2xl font-semibold mb-4">Loading...</h2>
+          <div className="animate-pulse flex space-x-4 justify-center">
+            <div className="rounded-full bg-blue-400 h-3 w-3"></div>
+            <div className="rounded-full bg-blue-400 h-3 w-3"></div>
+            <div className="rounded-full bg-blue-400 h-3 w-3"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-6">
@@ -41,6 +58,14 @@ export default function Home() {
         <h1 className="text-3xl font-bold mb-2">Sunday Group Formation</h1>
         <p className="text-lg">Host Page</p>
       </header>
+      
+      {error && (
+        <div className="max-w-6xl mx-auto mb-6">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-center">
+            {error}
+          </div>
+        </div>
+      )}
       
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
@@ -78,7 +103,7 @@ export default function Home() {
           
           {isGroupsFormed && (
             <button
-              onClick={resetGroups}
+              onClick={() => resetGroups()}
               className="bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-6 rounded-md"
             >
               Reset Groups
@@ -86,7 +111,7 @@ export default function Home() {
           )}
           
           <button
-            onClick={resetRoom}
+            onClick={() => resetRoom()}
             className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-md"
           >
             Reset Room

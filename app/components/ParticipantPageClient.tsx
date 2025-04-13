@@ -11,7 +11,7 @@ interface ParticipantPageClientProps {
 }
 
 export default function ParticipantPageClient({ roomId, participantId }: ParticipantPageClientProps) {
-  const { participants, groups, isGroupsFormed } = useRoom();
+  const { participants, groups, isGroupsFormed, isLoading, error } = useRoom();
   const [participant, setParticipant] = useState<Participant | undefined>(undefined);
   const [participantGroup, setParticipantGroup] = useState<Group | undefined>(undefined);
   
@@ -27,6 +27,31 @@ export default function ParticipantPageClient({ roomId, participantId }: Partici
       setParticipantGroup(undefined);
     }
   }, [participants, groups, participantId]);
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6">
+        <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+          <h2 className="text-2xl font-semibold mb-4">Loading...</h2>
+          <div className="animate-pulse flex space-x-4 justify-center">
+            <div className="rounded-full bg-blue-400 h-3 w-3"></div>
+            <div className="rounded-full bg-blue-400 h-3 w-3"></div>
+            <div className="rounded-full bg-blue-400 h-3 w-3"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 text-center">
+          {error}
+        </div>
+      </div>
+    );
+  }
   
   if (!participant) {
     return (

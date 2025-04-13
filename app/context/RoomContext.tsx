@@ -2,115 +2,265 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Participant, Group, generateUniqueId } from '../utils/types';
-import { formGroups } from '../utils/groupFormation';
 
 interface RoomContextType {
   roomId: string;
   participants: Participant[];
   groups: Group[] | null;
   isGroupsFormed: boolean;
-  addParticipant: (name: string, isWillingToLead: boolean) => Participant;
-  addParticipantManually: (name: string, isWillingToLead: boolean) => void;
-  removeParticipant: (id: string) => void;
-  formGroups: () => boolean;
-  resetGroups: () => void;
-  resetRoom: () => void;
+  isLoading: boolean;
+  error: string | null;
+  addParticipant: (name: string, isWillingToLead: boolean) => Promise<Participant>;
+  addParticipantManually: (name: string, isWillingToLead: boolean) => Promise<void>;
+  removeParticipant: (id: string) => Promise<void>;
+  formGroups: () => Promise<boolean>;
+  resetGroups: () => Promise<void>;
+  resetRoom: () => Promise<void>;
 }
 
 const RoomContext = createContext<RoomContextType | undefined>(undefined);
 
-// Helper function to safely parse JSON from localStorage
-const safelyParseJSON = (json: string | null, fallback: any = null) => {
-  if (!json) return fallback;
-  try {
-    return JSON.parse(json);
-  } catch (e) {
-    console.error('Failed to parse JSON from localStorage:', e);
-    return fallback;
-  }
-};
-
 export function RoomProvider({ children }: { children: React.ReactNode }) {
-  // Use a fixed roomId for all sessions instead of generating a random one
+  // Use a fixed roomId for all sessions
   const [roomId] = useState<string>("sunday-group");
   
-  const [participants, setParticipants] = useState<Participant[]>(() => {
-    if (typeof window === 'undefined') return [];
-    return safelyParseJSON(localStorage.getItem('participants'), []);
-  });
-  
-  const [groups, setGroups] = useState<Group[] | null>(() => {
-    if (typeof window === 'undefined') return null;
-    return safelyParseJSON(localStorage.getItem('groups'), null);
-  });
-  
-  const [isGroupsFormed, setIsGroupsFormed] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('isGroupsFormed') === 'true';
-  });
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [groups, setGroups] = useState<Group[] | null>(null);
+  const [isGroupsFormed, setIsGroupsFormed] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastFetchTime, setLastFetchTime] = useState<number>(0);
 
-  // Persist state to localStorage whenever it changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('roomId', roomId);
-      localStorage.setItem('participants', JSON.stringify(participants));
-      localStorage.setItem('groups', groups ? JSON.stringify(groups) : '');
-      localStorage.setItem('isGroupsFormed', isGroupsFormed.toString());
+  // Fetch room data from the server
+  const fetchRoomData = async () => {
+    try {
+      const response = await fetch(`/api/room?roomId=${roomId}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch room data');
+      }
+      
+      const data = await response.json();
+      
+      setParticipants(data.participants);
+      setGroups(data.groups);
+      setIsGroupsFormed(data.isGroupsFormed);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching room data:', err);
+      setError('Failed to connect to the server');
+    } finally {
+      setIsLoading(false);
+      setLastFetchTime(Date.now());
     }
-  }, [roomId, participants, groups, isGroupsFormed]);
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchRoomData();
+  }, []);
+
+  // Polling for updates every 3 seconds
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      // Only fetch if it's been more than 2 seconds since the last fetch
+      // This prevents too many requests if we're already making API calls
+      if (Date.now() - lastFetchTime > 2000) {
+        fetchRoomData();
+      }
+    }, 3000);
+    
+    return () => clearInterval(intervalId);
+  }, [lastFetchTime]);
 
   // Add a participant who joined via the join page
-  const addParticipant = (name: string, isWillingToLead: boolean): Participant => {
-    const newParticipant: Participant = {
-      id: generateUniqueId(),
-      name,
-      isWillingToLead
-    };
-    
-    setParticipants(prev => [...prev, newParticipant]);
-    return newParticipant;
+  const addParticipant = async (name: string, isWillingToLead: boolean): Promise<Participant> => {
+    try {
+      const participantId = generateUniqueId();
+      
+      const response = await fetch('/api/room', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roomId,
+          action: 'addParticipant',
+          data: {
+            id: participantId,
+            name,
+            isWillingToLead
+          }
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to add participant');
+      }
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to add participant');
+      }
+      
+      setParticipants(result.participants);
+      setLastFetchTime(Date.now());
+      
+      return result.participant;
+    } catch (err) {
+      console.error('Error adding participant:', err);
+      setError('Failed to add participant');
+      throw err;
+    }
   };
 
   // Add a participant manually from the host page
-  const addParticipantManually = (name: string, isWillingToLead: boolean) => {
-    addParticipant(name, isWillingToLead);
+  const addParticipantManually = async (name: string, isWillingToLead: boolean) => {
+    await addParticipant(name, isWillingToLead);
   };
 
   // Remove a participant
-  const removeParticipant = (id: string) => {
-    setParticipants(prev => prev.filter(p => p.id !== id));
+  const removeParticipant = async (id: string) => {
+    try {
+      const response = await fetch('/api/room', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roomId,
+          action: 'removeParticipant',
+          data: {
+            participantId: id
+          }
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to remove participant');
+      }
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to remove participant');
+      }
+      
+      setParticipants(result.participants);
+      setLastFetchTime(Date.now());
+    } catch (err) {
+      console.error('Error removing participant:', err);
+      setError('Failed to remove participant');
+      throw err;
+    }
   };
 
   // Form groups from participants
-  const createGroups = (): boolean => {
-    const newGroups = formGroups(participants);
-    
-    if (newGroups === null) {
-      return false; // Not enough leaders
+  const createGroups = async (): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/room', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roomId,
+          action: 'formGroups'
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to form groups');
+      }
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        return false; // Not enough leaders
+      }
+      
+      setGroups(result.groups);
+      setParticipants(result.participants);
+      setIsGroupsFormed(result.isGroupsFormed);
+      setLastFetchTime(Date.now());
+      
+      return true;
+    } catch (err) {
+      console.error('Error forming groups:', err);
+      setError('Failed to form groups');
+      return false;
     }
-    
-    setGroups(newGroups);
-    setIsGroupsFormed(true);
-    return true;
   };
 
   // Reset groups without clearing participants
-  const resetGroups = () => {
-    setGroups(null);
-    setIsGroupsFormed(false);
-    
-    // Clear group assignments from participants
-    setParticipants(prev => 
-      prev.map(p => ({ ...p, groupId: undefined }))
-    );
+  const resetGroups = async () => {
+    try {
+      const response = await fetch('/api/room', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roomId,
+          action: 'resetGroups'
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to reset groups');
+      }
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to reset groups');
+      }
+      
+      setGroups(result.groups);
+      setParticipants(result.participants);
+      setIsGroupsFormed(result.isGroupsFormed);
+      setLastFetchTime(Date.now());
+    } catch (err) {
+      console.error('Error resetting groups:', err);
+      setError('Failed to reset groups');
+      throw err;
+    }
   };
 
   // Reset the entire room
-  const resetRoom = () => {
-    // No longer changing roomId since we're using a fixed value
-    setParticipants([]);
-    setGroups(null);
-    setIsGroupsFormed(false);
+  const resetRoom = async () => {
+    try {
+      const response = await fetch('/api/room', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roomId,
+          action: 'resetRoom'
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to reset room');
+      }
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to reset room');
+      }
+      
+      setParticipants(result.participants);
+      setGroups(result.groups);
+      setIsGroupsFormed(result.isGroupsFormed);
+      setLastFetchTime(Date.now());
+    } catch (err) {
+      console.error('Error resetting room:', err);
+      setError('Failed to reset room');
+      throw err;
+    }
   };
 
   const value = {
@@ -118,6 +268,8 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     participants,
     groups,
     isGroupsFormed,
+    isLoading,
+    error,
     addParticipant,
     addParticipantManually,
     removeParticipant,
