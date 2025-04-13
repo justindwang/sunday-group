@@ -22,10 +22,10 @@ export default function Home() {
   const [showError, setShowError] = useState(false);
   const [joinUrl, setJoinUrl] = useState('');
   
-  // Generate the join URL on the client side
+  // Generate the join URL on the client side with the fixed roomId
   useEffect(() => {
-    setJoinUrl(`${window.location.origin}/join/${roomId}`);
-  }, [roomId]);
+    setJoinUrl(`${window.location.origin}/join/sunday-group`);
+  }, []);
   
   const handleFormGroups = () => {
     const success = formGroups();

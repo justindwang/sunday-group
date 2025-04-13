@@ -31,8 +31,8 @@ export default function JoinPageClient({ roomId }: JoinPageClientProps) {
       // Add the participant and get their ID
       const participant = addParticipant(name.trim(), isWillingToLead);
       
-      // Redirect to the participant's group page
-      router.push(`/participant/${roomId}/${participant.id}`);
+      // Redirect to the participant's group page with the fixed roomId
+      router.push(`/participant/sunday-group/${participant.id}`);
     } catch (err) {
       setError('Failed to join the room. Please try again.');
       setIsSubmitting(false);

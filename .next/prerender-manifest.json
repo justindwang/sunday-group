@@ -56,31 +56,6 @@
     }
   },
   "dynamicRoutes": {
-    "/participant/[roomId]/[participantId]": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "Next-Action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "routeRegex": "^/participant/([^/]+?)/([^/]+?)(?:/)?$",
-      "dataRoute": "/participant/[roomId]/[participantId].rsc",
-      "fallback": null,
-      "dataRouteRegex": "^/participant/([^/]+?)/([^/]+?)\\.rsc$",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
     "/join/[roomId]": {
       "experimentalBypassFor": [
         {
@@ -105,12 +80,37 @@
         "x-next-revalidated-tags",
         "x-next-revalidate-tag-token"
       ]
+    },
+    "/participant/[roomId]/[participantId]": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "Next-Action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "routeRegex": "^/participant/([^/]+?)/([^/]+?)(?:/)?$",
+      "dataRoute": "/participant/[roomId]/[participantId].rsc",
+      "fallback": null,
+      "dataRouteRegex": "^/participant/([^/]+?)/([^/]+?)\\.rsc$",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
     }
   },
   "notFoundRoutes": [],
   "preview": {
-    "previewModeId": "3b7087f5613947bec623ff2df6869357",
-    "previewModeSigningKey": "01cbaafd1e83bc2417a21010f2ab8e97c4717ee47634b7bd296d830e3dab64ca",
-    "previewModeEncryptionKey": "d7fed8f53916b77f1a4f0b25846071e712ed0074986f1999d032e9ffbbc93717"
+    "previewModeId": "f15fc1e449f2f47e2c8c417c82f3e330",
+    "previewModeSigningKey": "0143d1dcbf2a14ac226e6daf413fb7b1ed48df883fc4aefc19fe43e3f8265edb",
+    "previewModeEncryptionKey": "9a36435be1fd0d28c3526d6ce03f1fba82aa2c9755948bf95c6344d7ccae5b6d"
   }
 }

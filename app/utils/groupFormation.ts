@@ -42,8 +42,8 @@ export function formGroups(participants: Participant[]): Group[] | null {
   for (let i = 0; i < numGroups; i++) {
     if (i < leaders.length) {
       groups.push({
-        id: generateUniqueId(),
-        name: getRandomBibleBook(),
+        id: `group-${i + 1}`,
+        name: `Group ${i + 1}`,
         participants: [leaders[i]],
         hasLeader: true
       });

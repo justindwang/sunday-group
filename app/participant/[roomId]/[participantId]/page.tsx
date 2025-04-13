@@ -11,5 +11,6 @@ export async function generateStaticParams() {
 export default async function ParticipantPage({ params }: { params: Promise<{ roomId: string; participantId: string }> }) {
   // Await the params Promise to get the actual values
   const resolvedParams = await params;
-  return <ParticipantPageClient roomId={resolvedParams.roomId} participantId={resolvedParams.participantId} />;
+  // Always use the fixed roomId "sunday-group" regardless of URL parameter
+  return <ParticipantPageClient roomId="sunday-group" participantId={resolvedParams.participantId} />;
 }

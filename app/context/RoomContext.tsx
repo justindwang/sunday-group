@@ -31,11 +31,8 @@ const safelyParseJSON = (json: string | null, fallback: any = null) => {
 };
 
 export function RoomProvider({ children }: { children: React.ReactNode }) {
-  // Initialize state from localStorage if available, otherwise generate new values
-  const [roomId, setRoomId] = useState<string>(() => {
-    if (typeof window === 'undefined') return generateUniqueId();
-    return localStorage.getItem('roomId') || generateUniqueId();
-  });
+  // Use a fixed roomId for all sessions instead of generating a random one
+  const [roomId] = useState<string>("sunday-group");
   
   const [participants, setParticipants] = useState<Participant[]>(() => {
     if (typeof window === 'undefined') return [];
@@ -110,8 +107,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
 
   // Reset the entire room
   const resetRoom = () => {
-    const newRoomId = generateUniqueId();
-    setRoomId(newRoomId);
+    // No longer changing roomId since we're using a fixed value
     setParticipants([]);
     setGroups(null);
     setIsGroupsFormed(false);
