@@ -14,6 +14,7 @@ export default function JoinPageClient({ roomId }: JoinPageClientProps) {
   
   const [name, setName] = useState('');
   const [isWillingToLead, setIsWillingToLead] = useState(false);
+  const [isBigGroupLeader, setIsBigGroupLeader] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   
@@ -29,7 +30,7 @@ export default function JoinPageClient({ roomId }: JoinPageClientProps) {
     
     try {
       // Add the participant and get their ID
-      const participant = await addParticipant(name.trim(), isWillingToLead);
+      const participant = await addParticipant(name.trim(), isWillingToLead, isBigGroupLeader);
       
       // Redirect to the participant's group page with the fixed roomId
       router.push(`/participant/sunday-group/${participant.id}`);
@@ -67,18 +68,34 @@ export default function JoinPageClient({ roomId }: JoinPageClientProps) {
             />
           </div>
           
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isLeader"
-              checked={isWillingToLead}
-              onChange={(e) => setIsWillingToLead(e.target.checked)}
-              className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              disabled={isSubmitting}
-            />
-            <label htmlFor="isLeader" className="ml-3 block text-sm">
-              I am willing to lead a group
-            </label>
+          <div className="space-y-3">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="isLeader"
+                checked={isWillingToLead}
+                onChange={(e) => setIsWillingToLead(e.target.checked)}
+                className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                disabled={isSubmitting}
+              />
+              <label htmlFor="isLeader" className="ml-3 block text-sm">
+                I am willing to be a small group lead today
+              </label>
+            </div>
+            
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="isBigGroupLeader"
+                checked={isBigGroupLeader}
+                onChange={(e) => setIsBigGroupLeader(e.target.checked)}
+                className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                disabled={isSubmitting}
+              />
+              <label htmlFor="isBigGroupLeader" className="ml-3 block text-sm">
+                I am leading a sermon discussion today
+              </label>
+            </div>
           </div>
           
           <button

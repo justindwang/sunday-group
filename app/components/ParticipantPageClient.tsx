@@ -85,14 +85,15 @@ export default function ParticipantPageClient({ roomId, participantId }: Partici
           <div>
             <div className="text-center mb-8">
               <h2 className="text-2xl font-semibold mb-2">Your Group</h2>
-              <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                {participantGroup.name}
+              <p className="text-md mt-2">
+                {participantGroup.testament === 'old' ? 'Old Testament' : 'New Testament'} Group
               </p>
             </div>
             
             <GroupDisplay 
               groups={[participantGroup]} 
-              highlightGroupId={participantGroup.id} 
+              highlightGroupId={participantGroup.id}
+              hideGroupsHeading={true}
             />
           </div>
         ) : (

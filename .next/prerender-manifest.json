@@ -5,7 +5,7 @@
       "initialHeaders": {
         "cache-control": "public, max-age=0, must-revalidate",
         "content-type": "image/x-icon",
-        "x-next-cache-tags": "_N_T_/layout,_N_T_/favicon.ico/layout,_N_T_/favicon.ico/route,_N_T_/favicon.ico/"
+        "x-next-cache-tags": "_N_T_/layout,_N_T_/favicon.ico/layout,_N_T_/favicon.ico/route,_N_T_/favicon.ico"
       },
       "experimentalBypassFor": [
         {
@@ -56,31 +56,6 @@
     }
   },
   "dynamicRoutes": {
-    "/join/[roomId]": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "Next-Action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "routeRegex": "^/join/([^/]+?)(?:/)?$",
-      "dataRoute": "/join/[roomId].rsc",
-      "fallback": null,
-      "dataRouteRegex": "^/join/([^/]+?)\\.rsc$",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
     "/participant/[roomId]/[participantId]": {
       "experimentalBypassFor": [
         {
@@ -105,12 +80,37 @@
         "x-next-revalidated-tags",
         "x-next-revalidate-tag-token"
       ]
+    },
+    "/join/[roomId]": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "Next-Action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "routeRegex": "^/join/([^/]+?)(?:/)?$",
+      "dataRoute": "/join/[roomId].rsc",
+      "fallback": null,
+      "dataRouteRegex": "^/join/([^/]+?)\\.rsc$",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
     }
   },
   "notFoundRoutes": [],
   "preview": {
-    "previewModeId": "f15fc1e449f2f47e2c8c417c82f3e330",
-    "previewModeSigningKey": "0143d1dcbf2a14ac226e6daf413fb7b1ed48df883fc4aefc19fe43e3f8265edb",
-    "previewModeEncryptionKey": "9a36435be1fd0d28c3526d6ce03f1fba82aa2c9755948bf95c6344d7ccae5b6d"
+    "previewModeId": "324f5947ae2dc8865bfe1977bf83bbec",
+    "previewModeSigningKey": "20f6a4ec0aaf0da2ed76e801f0af05759120feac8318f093d359fdc7cd5fba9a",
+    "previewModeEncryptionKey": "9ac038d57c622899f401b3b12a383cc720ad1f181958f82d0d31f6957008eedb"
   }
 }

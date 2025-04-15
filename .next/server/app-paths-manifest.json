@@ -1,5 +1,8 @@
 {
-  "/api/room/route": "app/api/room/route.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/page": "app/page.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/room/route": "app/api/room/route.js",
+  "/page": "app/page.js",
+  "/join/[roomId]/page": "app/join/[roomId]/page.js",
+  "/participant/[roomId]/[participantId]/page": "app/participant/[roomId]/[participantId]/page.js"
 }

@@ -33,7 +33,7 @@ export default function ParticipantList({ participants }: ParticipantListProps) 
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-[75%] mx-auto">
       <h2 className="text-xl font-semibold mb-4 text-center">Participants ({participants.length})</h2>
       <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {participants.map((participant) => (
@@ -43,17 +43,30 @@ export default function ParticipantList({ participants }: ParticipantListProps) 
               bg-white dark:bg-gray-800 
               p-3 rounded-lg shadow-sm 
               flex items-center justify-between
-              border-l-4 ${participant.isWillingToLead ? 'border-blue-500' : 'border-gray-300'}
+              border-l-4 ${
+                participant.isBigGroupLeader 
+                  ? 'border-green-500' 
+                  : participant.isWillingToLead 
+                    ? 'border-blue-500' 
+                    : 'border-gray-300'
+              }
               ${animatedParticipants.includes(participant.id) && !participant.groupId ? 'animate-fadeIn' : ''}
               ${participant.groupId ? 'opacity-70' : 'opacity-100'}
             `}
           >
             <span className="font-medium truncate">{participant.name}</span>
-            {participant.isWillingToLead && (
-              <span className="ml-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full">
-                Leader
-              </span>
-            )}
+            <div className="flex flex-col space-y-1">
+              {participant.isBigGroupLeader && (
+                <span className="ml-2 text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded-full whitespace-nowrap">
+                  Sermon Lead
+                </span>
+              )}
+              {participant.isWillingToLead && (
+                <span className="ml-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full whitespace-nowrap">
+                  Small Group Lead
+                </span>
+              )}
+            </div>
           </li>
         ))}
       </ul>

@@ -8,6 +8,13 @@
 [build.environment]
   NEXT_USE_NETLIFY_EDGE = "true"
 
+# First, handle API routes normally
+[[redirects]]
+  from = "/api/*"
+  to = "/api/:splat"
+  status = 200
+
+# Then, handle all other routes with SPA redirect
 [[redirects]]
   from = "/*"
   to = "/index.html"

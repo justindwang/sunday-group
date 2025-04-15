@@ -3,12 +3,13 @@
 import React, { useState } from 'react';
 
 interface AddParticipantFormProps {
-  onAddParticipant: (name: string, isWillingToLead: boolean) => Promise<void>;
+  onAddParticipant: (name: string, isWillingToLead: boolean, isBigGroupLeader: boolean) => Promise<void>;
 }
 
 export default function AddParticipantForm({ onAddParticipant }: AddParticipantFormProps) {
   const [name, setName] = useState('');
   const [isWillingToLead, setIsWillingToLead] = useState(false);
+  const [isBigGroupLeader, setIsBigGroupLeader] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -21,9 +22,10 @@ export default function AddParticipantForm({ onAddParticipant }: AddParticipantF
     setError('');
     
     try {
-      await onAddParticipant(name.trim(), isWillingToLead);
+      await onAddParticipant(name.trim(), isWillingToLead, isBigGroupLeader);
       setName('');
       setIsWillingToLead(false);
+      setIsBigGroupLeader(false);
     } catch (err) {
       setError('Failed to add participant. Please try again.');
       console.error('Error adding participant:', err);
@@ -59,18 +61,34 @@ export default function AddParticipantForm({ onAddParticipant }: AddParticipantF
           />
         </div>
         
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="isLeader"
-            checked={isWillingToLead}
-            onChange={(e) => setIsWillingToLead(e.target.checked)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            disabled={isSubmitting}
-          />
-          <label htmlFor="isLeader" className="ml-2 block text-sm">
-            Willing to lead a group
-          </label>
+        <div className="space-y-3">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="isLeader"
+              checked={isWillingToLead}
+              onChange={(e) => setIsWillingToLead(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              disabled={isSubmitting}
+            />
+            <label htmlFor="isLeader" className="ml-2 block text-sm">
+              Willing to be a small group lead today
+            </label>
+          </div>
+          
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="isBigGroupLeader"
+              checked={isBigGroupLeader}
+              onChange={(e) => setIsBigGroupLeader(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              disabled={isSubmitting}
+            />
+            <label htmlFor="isBigGroupLeader" className="ml-2 block text-sm">
+              Leading sermon discussion today
+            </label>
+          </div>
         </div>
         
         <button

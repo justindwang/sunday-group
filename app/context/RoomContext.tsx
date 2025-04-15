@@ -10,8 +10,8 @@ interface RoomContextType {
   isGroupsFormed: boolean;
   isLoading: boolean;
   error: string | null;
-  addParticipant: (name: string, isWillingToLead: boolean) => Promise<Participant>;
-  addParticipantManually: (name: string, isWillingToLead: boolean) => Promise<void>;
+  addParticipant: (name: string, isWillingToLead: boolean, isBigGroupLeader: boolean) => Promise<Participant>;
+  addParticipantManually: (name: string, isWillingToLead: boolean, isBigGroupLeader: boolean) => Promise<void>;
   removeParticipant: (id: string) => Promise<void>;
   formGroups: () => Promise<boolean>;
   resetGroups: () => Promise<void>;
@@ -74,7 +74,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   }, [lastFetchTime]);
 
   // Add a participant who joined via the join page
-  const addParticipant = async (name: string, isWillingToLead: boolean): Promise<Participant> => {
+  const addParticipant = async (name: string, isWillingToLead: boolean, isBigGroupLeader: boolean): Promise<Participant> => {
     try {
       const participantId = generateUniqueId();
       
@@ -89,7 +89,8 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
           data: {
             id: participantId,
             name,
-            isWillingToLead
+            isWillingToLead,
+            isBigGroupLeader
           }
         }),
       });
@@ -116,8 +117,8 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Add a participant manually from the host page
-  const addParticipantManually = async (name: string, isWillingToLead: boolean) => {
-    await addParticipant(name, isWillingToLead);
+  const addParticipantManually = async (name: string, isWillingToLead: boolean, isBigGroupLeader: boolean) => {
+    await addParticipant(name, isWillingToLead, isBigGroupLeader);
   };
 
   // Remove a participant

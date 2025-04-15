@@ -2,7 +2,9 @@ export interface Participant {
   id: string;
   name: string;
   isWillingToLead: boolean;
+  isBigGroupLeader: boolean;
   groupId?: string;
+  testament?: 'old' | 'new'; // To track which testament group they belong to
 }
 
 export interface Group {
@@ -10,9 +12,10 @@ export interface Group {
   name: string;
   participants: Participant[];
   hasLeader: boolean;
+  testament: 'old' | 'new'; // Whether this is an Old Testament or New Testament group
 }
 
-export const BIBLE_BOOKS = [
+export const OLD_TESTAMENT_BOOKS = [
   "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy",
   "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel",
   "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles",
@@ -20,7 +23,10 @@ export const BIBLE_BOOKS = [
   "Proverbs", "Ecclesiastes", "Song of Solomon", "Isaiah", "Jeremiah",
   "Lamentations", "Ezekiel", "Daniel", "Hosea", "Joel",
   "Amos", "Obadiah", "Jonah", "Micah", "Nahum",
-  "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi",
+  "Habakkuk", "Zephaniah", "Haggai", "Zechariah", "Malachi"
+];
+
+export const NEW_TESTAMENT_BOOKS = [
   "Matthew", "Mark", "Luke", "John", "Acts",
   "Romans", "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians",
   "Philippians", "Colossians", "1 Thessalonians", "2 Thessalonians",
@@ -29,8 +35,11 @@ export const BIBLE_BOOKS = [
   "3 John", "Jude", "Revelation"
 ];
 
-export function getRandomBibleBook(): string {
-  return BIBLE_BOOKS[Math.floor(Math.random() * BIBLE_BOOKS.length)];
+export const BIBLE_BOOKS = [...OLD_TESTAMENT_BOOKS, ...NEW_TESTAMENT_BOOKS];
+
+export function getRandomBibleBook(testament: 'old' | 'new'): string {
+  const books = testament === 'old' ? OLD_TESTAMENT_BOOKS : NEW_TESTAMENT_BOOKS;
+  return books[Math.floor(Math.random() * books.length)];
 }
 
 export function generateUniqueId(): string {

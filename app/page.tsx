@@ -54,9 +54,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen p-6">
-      <header className="mb-8 text-center">
+      <header className="mb-8 mt-8 text-center">
         <h1 className="text-3xl font-bold mb-2">Sunday Group Formation</h1>
-        <p className="text-lg">Host Page</p>
       </header>
       
       {error && (
@@ -120,7 +119,7 @@ export default function Home() {
         
         {showError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 text-center">
-            Not enough willing leaders to form groups. Each group needs at least one leader.
+            Unable to form groups. Make sure there are enough leaders and participants to form an even number of groups with at least 4 people per group.
           </div>
         )}
         

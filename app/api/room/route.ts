@@ -27,11 +27,12 @@ export async function POST(request: NextRequest) {
     
     switch (action) {
       case 'addParticipant': {
-        const { name, isWillingToLead } = data;
+        const { name, isWillingToLead, isBigGroupLeader } = data;
         const newParticipant: Participant = {
           id: data.id || Math.random().toString(36).substring(2, 9),
           name,
-          isWillingToLead
+          isWillingToLead,
+          isBigGroupLeader
         };
         
         const updatedParticipants = [...roomData.participants, newParticipant];
