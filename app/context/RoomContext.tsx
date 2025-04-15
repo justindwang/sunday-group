@@ -42,10 +42,16 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       
       const data = await response.json();
       
-      setParticipants(data.participants);
-      setGroups(data.groups);
-      setIsGroupsFormed(data.isGroupsFormed);
-      setError(null);
+      // Check if data is valid
+      if (data && Array.isArray(data.participants)) {
+        setParticipants(data.participants);
+        setGroups(data.groups);
+        setIsGroupsFormed(data.isGroupsFormed);
+        setError(null);
+      } else {
+        console.error('Invalid data format received:', data);
+        setError('Received invalid data format from server');
+      }
     } catch (err) {
       console.error('Error fetching room data:', err);
       setError('Failed to connect to the server');
@@ -177,10 +183,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       
       const result = await response.json();
       
-      if (!result.success) {
-        return false; // Not enough leaders
-      }
-      
+      // Group formation should always succeed now
       setGroups(result.groups);
       setParticipants(result.participants);
       setIsGroupsFormed(result.isGroupsFormed);

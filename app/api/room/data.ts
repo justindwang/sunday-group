@@ -1,57 +1,124 @@
 import { Participant, Group } from '../../utils/types';
+import { db } from '../../utils/firebase';
 
-// In-memory storage for room data
-// In a production app, you would use a database
+// Interface for room data
 interface RoomData {
   participants: Participant[];
   groups: Group[] | null;
   isGroupsFormed: boolean;
+  lastUpdated?: number; // Timestamp for cache validation
 }
 
-// Initialize with empty data
-const roomsData: Record<string, RoomData> = {
-  'sunday-group': {
-    participants: [],
-    groups: null,
-    isGroupsFormed: false
-  }
+// Cache to minimize reads from Firestore
+const cache: Record<string, { data: RoomData, timestamp: number }> = {};
+const CACHE_TTL = 5000; // 5 seconds cache TTL
+
+// Default empty room data
+const defaultRoomData: RoomData = {
+  participants: [],
+  groups: null,
+  isGroupsFormed: false,
+  lastUpdated: Date.now()
 };
 
-export function getRoomData(roomId: string): RoomData {
-  // Return the room data or create it if it doesn't exist
-  if (!roomsData[roomId]) {
-    roomsData[roomId] = {
-      participants: [],
-      groups: null,
-      isGroupsFormed: false
+// Collection name for rooms
+const ROOMS_COLLECTION = 'rooms';
+
+/**
+ * Get room data from Firestore or cache
+ */
+export async function getRoomData(roomId: string): Promise<RoomData> {
+  const now = Date.now();
+  
+  // Check cache first
+  if (cache[roomId] && now - cache[roomId].timestamp < CACHE_TTL) {
+    return cache[roomId].data;
+  }
+  
+  try {
+    // Try to get from Firestore
+    const roomDoc = await db.collection(ROOMS_COLLECTION).doc(roomId).get();
+    
+    if (roomDoc.exists) {
+      const data = roomDoc.data() as RoomData;
+      
+      // Update cache
+      cache[roomId] = { data, timestamp: now };
+      return data;
+    }
+    
+    // If not found, initialize with default data
+    await db.collection(ROOMS_COLLECTION).doc(roomId).set({
+      ...defaultRoomData,
+      lastUpdated: now
+    });
+    
+    cache[roomId] = { data: defaultRoomData, timestamp: now };
+    return defaultRoomData;
+  } catch (error) {
+    console.error('Error getting room data:', error);
+    
+    // Fallback to default data on error
+    cache[roomId] = { data: defaultRoomData, timestamp: now };
+    return defaultRoomData;
+  }
+}
+
+/**
+ * Update room data in Firestore
+ */
+export async function updateRoomData(roomId: string, data: Partial<RoomData>): Promise<RoomData> {
+  try {
+    const currentData = await getRoomData(roomId);
+    
+    // Update only the provided fields
+    const updatedData = { ...currentData };
+    
+    if (data.participants !== undefined) {
+      updatedData.participants = data.participants;
+    }
+    
+    if (data.groups !== undefined) {
+      updatedData.groups = data.groups;
+    }
+    
+    if (data.isGroupsFormed !== undefined) {
+      updatedData.isGroupsFormed = data.isGroupsFormed;
+    }
+    
+    // Add timestamp
+    updatedData.lastUpdated = Date.now();
+    
+    // Update Firestore
+    await db.collection(ROOMS_COLLECTION).doc(roomId).set(updatedData);
+    
+    // Update cache
+    cache[roomId] = { data: updatedData, timestamp: Date.now() };
+    
+    return updatedData;
+  } catch (error) {
+    console.error('Error updating room data:', error);
+    throw error;
+  }
+}
+
+/**
+ * Reset room data
+ */
+export async function resetRoom(roomId: string): Promise<void> {
+  try {
+    const resetData = {
+      ...defaultRoomData,
+      lastUpdated: Date.now()
     };
+    
+    // Reset in Firestore
+    await db.collection(ROOMS_COLLECTION).doc(roomId).set(resetData);
+    
+    // Update cache
+    cache[roomId] = { data: resetData, timestamp: Date.now() };
+  } catch (error) {
+    console.error('Error resetting room:', error);
+    throw error;
   }
-  return roomsData[roomId];
-}
-
-export function updateRoomData(roomId: string, data: Partial<RoomData>): RoomData {
-  const room = getRoomData(roomId);
-  
-  // Update only the provided fields
-  if (data.participants !== undefined) {
-    room.participants = data.participants;
-  }
-  
-  if (data.groups !== undefined) {
-    room.groups = data.groups;
-  }
-  
-  if (data.isGroupsFormed !== undefined) {
-    room.isGroupsFormed = data.isGroupsFormed;
-  }
-  
-  return room;
-}
-
-export function resetRoom(roomId: string): void {
-  roomsData[roomId] = {
-    participants: [],
-    groups: null,
-    isGroupsFormed: false
-  };
 }

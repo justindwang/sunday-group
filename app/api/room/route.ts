@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const roomId = searchParams.get('roomId') || 'sunday-group';
   
-  const roomData = getRoomData(roomId);
+  const roomData = await getRoomData(roomId);
   
   return NextResponse.json(roomData);
 }
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { roomId = 'sunday-group', action, data } = body;
     
-    const roomData = getRoomData(roomId);
+    const roomData = await getRoomData(roomId);
     
     switch (action) {
       case 'addParticipant': {
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
         };
         
         const updatedParticipants = [...roomData.participants, newParticipant];
-        updateRoomData(roomId, { participants: updatedParticipants });
+        await updateRoomData(roomId, { participants: updatedParticipants });
         
         return NextResponse.json({ 
           success: true, 
@@ -48,10 +48,10 @@ export async function POST(request: NextRequest) {
       case 'removeParticipant': {
         const { participantId } = data;
         const updatedParticipants = roomData.participants.filter(
-          p => p.id !== participantId
+          (p: Participant) => p.id !== participantId
         );
         
-        updateRoomData(roomId, { participants: updatedParticipants });
+        await updateRoomData(roomId, { participants: updatedParticipants });
         
         return NextResponse.json({ 
           success: true,
@@ -62,15 +62,8 @@ export async function POST(request: NextRequest) {
       case 'formGroups': {
         const newGroups = formGroups(roomData.participants);
         
-        if (newGroups === null) {
-          return NextResponse.json({ 
-            success: false,
-            error: 'Not enough willing leaders to form groups'
-          });
-        }
-        
         // Update participants with their group assignments
-        const updatedParticipants = roomData.participants.map(p => {
+        const updatedParticipants = roomData.participants.map((p: Participant) => {
           const group = newGroups.find(g => 
             g.participants.some(gp => gp.id === p.id)
           );
@@ -82,7 +75,7 @@ export async function POST(request: NextRequest) {
           return p;
         });
         
-        updateRoomData(roomId, { 
+        await updateRoomData(roomId, { 
           groups: newGroups,
           participants: updatedParticipants,
           isGroupsFormed: true
@@ -98,12 +91,12 @@ export async function POST(request: NextRequest) {
       
       case 'resetGroups': {
         // Clear group assignments from participants
-        const updatedParticipants = roomData.participants.map(p => ({
+        const updatedParticipants = roomData.participants.map((p: Participant) => ({
           ...p,
           groupId: undefined
         }));
         
-        updateRoomData(roomId, {
+        await updateRoomData(roomId, {
           groups: null,
           participants: updatedParticipants,
           isGroupsFormed: false
@@ -118,7 +111,7 @@ export async function POST(request: NextRequest) {
       }
       
       case 'resetRoom': {
-        resetRoom(roomId);
+        await resetRoom(roomId);
         
         return NextResponse.json({ 
           success: true,

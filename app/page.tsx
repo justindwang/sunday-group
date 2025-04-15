@@ -94,7 +94,7 @@ export default function Home() {
         <div className="flex flex-wrap justify-center gap-4 mb-8">
           <button
             onClick={handleFormGroups}
-            disabled={participants.length < 4 || isGroupsFormed}
+            disabled={participants.length < 3 || isGroupsFormed}
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Form Groups
@@ -119,7 +119,7 @@ export default function Home() {
         
         {showError && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 text-center">
-            Unable to form groups. Make sure there are enough leaders and participants to form an even number of groups with at least 4 people per group.
+            An error occurred while forming groups. Please try again.
           </div>
         )}
         
