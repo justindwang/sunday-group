@@ -92,8 +92,13 @@ export async function updateRoomData(roomId: string, data: Partial<RoomData>): P
     // Update Firestore
     await db.collection(ROOMS_COLLECTION).doc(roomId).set(updatedData);
     
-    // Update cache
-    cache[roomId] = { data: updatedData, timestamp: Date.now() };
+    // For group reset operations, clear the cache completely to ensure fresh data
+    if (data.groups === null && data.isGroupsFormed === false) {
+      delete cache[roomId];
+    } else {
+      // Update cache for other operations
+      cache[roomId] = { data: updatedData, timestamp: Date.now() };
+    }
     
     return updatedData;
   } catch (error) {

@@ -100,7 +100,8 @@ export async function POST(request: NextRequest) {
         // Clear group assignments from participants
         const updatedParticipants = roomData.participants.map((p: Participant) => ({
           ...p,
-          groupId: undefined
+          groupId: undefined,
+          testament: undefined
         }));
         
         await updateRoomData(roomId, {

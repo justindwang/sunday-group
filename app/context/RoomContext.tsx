@@ -91,6 +91,9 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   // Add a participant who joined via the join page
   const addParticipant = async (name: string, isWillingToLead: boolean, isBigGroupLeader: boolean): Promise<Participant> => {
     try {
+      // Set a loading state to indicate operation in progress
+      setIsLoading(true);
+      
       const participantId = generateUniqueId();
       
       // Add cache-busting timestamp
@@ -126,14 +129,16 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         throw new Error(result.error || 'Failed to add participant');
       }
       
+      // Only update client state after successful API call
       setParticipants(result.participants);
       
       // Force a fresh fetch after a small delay to ensure Firestore consistency
       setTimeout(() => {
         fetchRoomData();
-      }, 100);
+      }, 200); // Increased delay for better consistency
       
       setLastFetchTime(Date.now());
+      setError(null); // Clear any previous errors
       
       return result.participant;
     } catch (err) {
@@ -151,6 +156,9 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   // Remove a participant
   const removeParticipant = async (id: string) => {
     try {
+      // Set a loading state to indicate operation in progress
+      setIsLoading(true);
+      
       // Add cache-busting timestamp
       const timestamp = Date.now();
       
@@ -181,14 +189,16 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         throw new Error(result.error || 'Failed to remove participant');
       }
       
+      // Only update client state after successful API call
       setParticipants(result.participants);
       
       // Force a fresh fetch after a small delay to ensure Firestore consistency
       setTimeout(() => {
         fetchRoomData();
-      }, 100);
+      }, 200); // Increased delay for better consistency
       
       setLastFetchTime(Date.now());
+      setError(null); // Clear any previous errors
     } catch (err) {
       console.error('Error removing participant:', err);
       setError('Failed to remove participant');
@@ -199,6 +209,9 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   // Form groups from participants
   const createGroups = async (): Promise<boolean> => {
     try {
+      // Set a loading state to indicate operation in progress
+      setIsLoading(true);
+      
       // Add cache-busting timestamp
       const timestamp = Date.now();
       
@@ -222,7 +235,11 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       
       const result = await response.json();
       
-      // Group formation should always succeed now
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to form groups');
+      }
+      
+      // Only update client state after successful API call
       setGroups(result.groups);
       setParticipants(result.participants);
       setIsGroupsFormed(result.isGroupsFormed);
@@ -230,9 +247,10 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       // Force a fresh fetch after a small delay to ensure Firestore consistency
       setTimeout(() => {
         fetchRoomData();
-      }, 100);
+      }, 200); // Increased delay for better consistency
       
       setLastFetchTime(Date.now());
+      setError(null); // Clear any previous errors
       
       return true;
     } catch (err) {
@@ -245,12 +263,11 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   // Reset groups without clearing participants
   const resetGroups = async () => {
     try {
-      // First, immediately clear the groups state to prevent UI flicker
-      setGroups(null);
-      setIsGroupsFormed(false);
-      
       // Add cache-busting timestamp
       const timestamp = Date.now();
+      
+      // Set a loading state to indicate operation in progress
+      setIsLoading(true);
       
       const response = await fetch(`/api/room?_t=${timestamp}`, {
         method: 'POST',
@@ -276,6 +293,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         throw new Error(result.error || 'Failed to reset groups');
       }
       
+      // Only update client state after successful API call
       setGroups(result.groups);
       setParticipants(result.participants);
       setIsGroupsFormed(result.isGroupsFormed);
@@ -283,9 +301,10 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       // Force a fresh fetch after a small delay to ensure Firestore consistency
       setTimeout(() => {
         fetchRoomData();
-      }, 100);
+      }, 200); // Increased delay for better consistency
       
       setLastFetchTime(Date.now());
+      setError(null); // Clear any previous errors
     } catch (err) {
       console.error('Error resetting groups:', err);
       setError('Failed to reset groups');
@@ -296,10 +315,8 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   // Reset the entire room
   const resetRoom = async () => {
     try {
-      // First, immediately clear the client-side state to prevent UI flicker
-      setParticipants([]);
-      setGroups(null);
-      setIsGroupsFormed(false);
+      // Set a loading state to indicate operation in progress
+      setIsLoading(true);
       
       // Add cache-busting timestamp
       const timestamp = Date.now();
@@ -328,12 +345,18 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         throw new Error(result.error || 'Failed to reset room');
       }
       
+      // Only update client state after successful API call
+      setParticipants([]);
+      setGroups(null);
+      setIsGroupsFormed(false);
+      
       // Force a fresh fetch after a small delay to ensure Firestore consistency
       setTimeout(() => {
         fetchRoomData();
-      }, 100);
+      }, 200); // Increased delay for better consistency
       
       setLastFetchTime(Date.now());
+      setError(null); // Clear any previous errors
     } catch (err) {
       console.error('Error resetting room:', err);
       setError('Failed to reset room');
