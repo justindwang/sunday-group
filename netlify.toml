@@ -7,10 +7,7 @@
 
 [build.environment]
   NEXT_USE_NETLIFY_EDGE = "true"
-  # Firebase environment variables will be set in the Netlify dashboard
-  # FIREBASE_PROJECT_ID = "your-project-id"
-  # FIREBASE_CLIENT_EMAIL = "your-client-email"
-  # FIREBASE_PRIVATE_KEY = "your-private-key"
+  # Firebase environment variables should be set in the Netlify dashboard as secrets
 
 # First, handle API routes normally
 [[redirects]]

@@ -66,6 +66,18 @@ service cloud.firestore {
    - `FIREBASE_CLIENT_EMAIL`: Your Firebase client email
    - `FIREBASE_PRIVATE_KEY`: Your Firebase private key (make sure to include all characters, including newlines)
 
+**Important Note About Netlify Secrets Scanning:**
+
+Netlify has a secrets scanning feature that may detect your Firebase credentials during the build process. To avoid this issue:
+
+1. Make sure you're adding the environment variables through the Netlify dashboard UI, not in the netlify.toml file
+2. If you're still encountering secrets scanning issues, you can:
+   - Go to "Site settings" > "Build & deploy" > "Environment" > "Environment variables"
+   - Toggle "Sensitive variable policy" to "Ignore"
+   - Or add specific variables to the ignore list
+
+Alternatively, you can use Netlify's dedicated "Environment variable" UI section which automatically handles secrets properly.
+
 ### Step 4: Deploy Your Site
 
 1. Commit and push your changes to your repository
