@@ -13,7 +13,14 @@ export async function GET(request: NextRequest) {
   
   const roomData = await getRoomData(roomId);
   
-  return NextResponse.json(roomData);
+  // Add cache-busting headers
+  const headers = new Headers();
+  headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  headers.set('Pragma', 'no-cache');
+  headers.set('Expires', '0');
+  headers.set('Surrogate-Control', 'no-store');
+  
+  return NextResponse.json(roomData, { headers });
 }
 
 // POST /api/room
@@ -113,12 +120,20 @@ export async function POST(request: NextRequest) {
       case 'resetRoom': {
         await resetRoom(roomId);
         
+        // Add cache-busting headers
+        const headers = new Headers();
+        headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        headers.set('Pragma', 'no-cache');
+        headers.set('Expires', '0');
+        headers.set('Surrogate-Control', 'no-store');
+        
         return NextResponse.json({ 
           success: true,
           participants: [],
           groups: null,
-          isGroupsFormed: false
-        });
+          isGroupsFormed: false,
+          timestamp: Date.now() // Add timestamp for cache busting
+        }, { headers });
       }
       
       default:

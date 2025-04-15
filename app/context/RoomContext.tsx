@@ -34,7 +34,16 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   // Fetch room data from the server
   const fetchRoomData = async () => {
     try {
-      const response = await fetch(`/api/room?roomId=${roomId}`);
+      // Add cache-busting timestamp to prevent browser caching
+      const timestamp = Date.now();
+      const response = await fetch(`/api/room?roomId=${roomId}&_t=${timestamp}`, {
+        // Add cache-busting headers
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch room data');
@@ -66,15 +75,15 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     fetchRoomData();
   }, []);
 
-  // Polling for updates every 3 seconds
+  // Polling for updates every 2 seconds (reduced from 3 seconds)
   useEffect(() => {
     const intervalId = setInterval(() => {
-      // Only fetch if it's been more than 2 seconds since the last fetch
+      // Only fetch if it's been more than 1 second since the last fetch (reduced from 2 seconds)
       // This prevents too many requests if we're already making API calls
-      if (Date.now() - lastFetchTime > 2000) {
+      if (Date.now() - lastFetchTime > 1000) {
         fetchRoomData();
       }
-    }, 3000);
+    }, 2000);
     
     return () => clearInterval(intervalId);
   }, [lastFetchTime]);
@@ -84,10 +93,16 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     try {
       const participantId = generateUniqueId();
       
-      const response = await fetch('/api/room', {
+      // Add cache-busting timestamp
+      const timestamp = Date.now();
+      
+      const response = await fetch(`/api/room?_t=${timestamp}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         },
         body: JSON.stringify({
           roomId,
@@ -112,6 +127,12 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       }
       
       setParticipants(result.participants);
+      
+      // Force a fresh fetch after a small delay to ensure Firestore consistency
+      setTimeout(() => {
+        fetchRoomData();
+      }, 100);
+      
       setLastFetchTime(Date.now());
       
       return result.participant;
@@ -130,10 +151,16 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   // Remove a participant
   const removeParticipant = async (id: string) => {
     try {
-      const response = await fetch('/api/room', {
+      // Add cache-busting timestamp
+      const timestamp = Date.now();
+      
+      const response = await fetch(`/api/room?_t=${timestamp}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         },
         body: JSON.stringify({
           roomId,
@@ -155,6 +182,12 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       }
       
       setParticipants(result.participants);
+      
+      // Force a fresh fetch after a small delay to ensure Firestore consistency
+      setTimeout(() => {
+        fetchRoomData();
+      }, 100);
+      
       setLastFetchTime(Date.now());
     } catch (err) {
       console.error('Error removing participant:', err);
@@ -166,10 +199,16 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   // Form groups from participants
   const createGroups = async (): Promise<boolean> => {
     try {
-      const response = await fetch('/api/room', {
+      // Add cache-busting timestamp
+      const timestamp = Date.now();
+      
+      const response = await fetch(`/api/room?_t=${timestamp}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         },
         body: JSON.stringify({
           roomId,
@@ -187,6 +226,12 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       setGroups(result.groups);
       setParticipants(result.participants);
       setIsGroupsFormed(result.isGroupsFormed);
+      
+      // Force a fresh fetch after a small delay to ensure Firestore consistency
+      setTimeout(() => {
+        fetchRoomData();
+      }, 100);
+      
       setLastFetchTime(Date.now());
       
       return true;
@@ -200,10 +245,20 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   // Reset groups without clearing participants
   const resetGroups = async () => {
     try {
-      const response = await fetch('/api/room', {
+      // First, immediately clear the groups state to prevent UI flicker
+      setGroups(null);
+      setIsGroupsFormed(false);
+      
+      // Add cache-busting timestamp
+      const timestamp = Date.now();
+      
+      const response = await fetch(`/api/room?_t=${timestamp}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         },
         body: JSON.stringify({
           roomId,
@@ -224,6 +279,12 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       setGroups(result.groups);
       setParticipants(result.participants);
       setIsGroupsFormed(result.isGroupsFormed);
+      
+      // Force a fresh fetch after a small delay to ensure Firestore consistency
+      setTimeout(() => {
+        fetchRoomData();
+      }, 100);
+      
       setLastFetchTime(Date.now());
     } catch (err) {
       console.error('Error resetting groups:', err);
@@ -235,10 +296,21 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   // Reset the entire room
   const resetRoom = async () => {
     try {
-      const response = await fetch('/api/room', {
+      // First, immediately clear the client-side state to prevent UI flicker
+      setParticipants([]);
+      setGroups(null);
+      setIsGroupsFormed(false);
+      
+      // Add cache-busting timestamp
+      const timestamp = Date.now();
+      
+      const response = await fetch(`/api/room?_t=${timestamp}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         },
         body: JSON.stringify({
           roomId,
@@ -256,9 +328,11 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         throw new Error(result.error || 'Failed to reset room');
       }
       
-      setParticipants(result.participants);
-      setGroups(result.groups);
-      setIsGroupsFormed(result.isGroupsFormed);
+      // Force a fresh fetch after a small delay to ensure Firestore consistency
+      setTimeout(() => {
+        fetchRoomData();
+      }, 100);
+      
       setLastFetchTime(Date.now());
     } catch (err) {
       console.error('Error resetting room:', err);

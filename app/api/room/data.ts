@@ -11,7 +11,7 @@ interface RoomData {
 
 // Cache to minimize reads from Firestore
 const cache: Record<string, { data: RoomData, timestamp: number }> = {};
-const CACHE_TTL = 5000; // 5 seconds cache TTL
+const CACHE_TTL = 1000; // 1 second cache TTL (reduced from 5 seconds)
 
 // Default empty room data
 const defaultRoomData: RoomData = {
@@ -115,8 +115,11 @@ export async function resetRoom(roomId: string): Promise<void> {
     // Reset in Firestore
     await db.collection(ROOMS_COLLECTION).doc(roomId).set(resetData);
     
-    // Update cache
-    cache[roomId] = { data: resetData, timestamp: Date.now() };
+    // Clear the cache completely to ensure fresh data is fetched
+    delete cache[roomId];
+    
+    // Force a small delay to ensure Firestore consistency
+    await new Promise(resolve => setTimeout(resolve, 100));
   } catch (error) {
     console.error('Error resetting room:', error);
     throw error;
