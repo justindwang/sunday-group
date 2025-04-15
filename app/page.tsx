@@ -88,7 +88,6 @@ export default function Home() {
             <AddParticipantForm onAddParticipant={addParticipantManually} />
           </div>
         </div>
-        g
         <div className="mb-8">
           <ParticipantList participants={participants} />
         </div>
