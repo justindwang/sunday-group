@@ -8,7 +8,15 @@ interface RoomContextType {
   participants: Participant[];
   groups: Group[] | null;
   isGroupsFormed: boolean;
-  isLoading: boolean;
+  isLoading: boolean; // Keep for backward compatibility
+  loadingStates: {
+    addingParticipant: boolean;
+    removingParticipant: boolean;
+    formingGroups: boolean;
+    resettingGroups: boolean;
+    resettingRoom: boolean;
+    fetchingData: boolean;
+  };
   error: string | null;
   addParticipant: (name: string, isWillingToLead: boolean, isBigGroupLeader: boolean) => Promise<Participant>;
   addParticipantManually: (name: string, isWillingToLead: boolean, isBigGroupLeader: boolean) => Promise<void>;
@@ -30,10 +38,23 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [lastFetchTime, setLastFetchTime] = useState<number>(0);
+  
+  // Operation-specific loading states
+  const [loadingStates, setLoadingStates] = useState({
+    addingParticipant: false,
+    removingParticipant: false,
+    formingGroups: false,
+    resettingGroups: false,
+    resettingRoom: false,
+    fetchingData: false
+  });
 
   // Fetch room data from the server
   const fetchRoomData = async () => {
     try {
+      // Set operation-specific loading state
+      setLoadingStates(prev => ({ ...prev, fetchingData: true }));
+      
       // Add cache-busting timestamp to prevent browser caching
       const timestamp = Date.now();
       const response = await fetch(`/api/room?roomId=${roomId}&_t=${timestamp}`, {
@@ -65,7 +86,9 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       console.error('Error fetching room data:', err);
       setError('Failed to connect to the server');
     } finally {
-      setIsLoading(false);
+      // Clear loading state
+      setLoadingStates(prev => ({ ...prev, fetchingData: false }));
+      setIsLoading(false); // Keep for backward compatibility
       setLastFetchTime(Date.now());
     }
   };
@@ -91,8 +114,8 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   // Add a participant who joined via the join page
   const addParticipant = async (name: string, isWillingToLead: boolean, isBigGroupLeader: boolean): Promise<Participant> => {
     try {
-      // Set a loading state to indicate operation in progress
-      setIsLoading(true);
+      // Set operation-specific loading state
+      setLoadingStates(prev => ({ ...prev, addingParticipant: true }));
       
       const participantId = generateUniqueId();
       
@@ -145,6 +168,9 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       console.error('Error adding participant:', err);
       setError('Failed to add participant');
       throw err;
+    } finally {
+      // Clear loading state
+      setLoadingStates(prev => ({ ...prev, addingParticipant: false }));
     }
   };
 
@@ -156,8 +182,8 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   // Remove a participant
   const removeParticipant = async (id: string) => {
     try {
-      // Set a loading state to indicate operation in progress
-      setIsLoading(true);
+      // Set operation-specific loading state
+      setLoadingStates(prev => ({ ...prev, removingParticipant: true }));
       
       // Add cache-busting timestamp
       const timestamp = Date.now();
@@ -203,14 +229,17 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       console.error('Error removing participant:', err);
       setError('Failed to remove participant');
       throw err;
+    } finally {
+      // Clear loading state
+      setLoadingStates(prev => ({ ...prev, removingParticipant: false }));
     }
   };
 
   // Form groups from participants
   const createGroups = async (): Promise<boolean> => {
     try {
-      // Set a loading state to indicate operation in progress
-      setIsLoading(true);
+      // Set operation-specific loading state
+      setLoadingStates(prev => ({ ...prev, formingGroups: true }));
       
       // Add cache-busting timestamp
       const timestamp = Date.now();
@@ -257,17 +286,20 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       console.error('Error forming groups:', err);
       setError('Failed to form groups');
       return false;
+    } finally {
+      // Clear loading state
+      setLoadingStates(prev => ({ ...prev, formingGroups: false }));
     }
   };
 
   // Reset groups without clearing participants
   const resetGroups = async () => {
     try {
+      // Set operation-specific loading state
+      setLoadingStates(prev => ({ ...prev, resettingGroups: true }));
+      
       // Add cache-busting timestamp
       const timestamp = Date.now();
-      
-      // Set a loading state to indicate operation in progress
-      setIsLoading(true);
       
       const response = await fetch(`/api/room?_t=${timestamp}`, {
         method: 'POST',
@@ -309,14 +341,17 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       console.error('Error resetting groups:', err);
       setError('Failed to reset groups');
       throw err;
+    } finally {
+      // Clear loading state
+      setLoadingStates(prev => ({ ...prev, resettingGroups: false }));
     }
   };
 
   // Reset the entire room
   const resetRoom = async () => {
     try {
-      // Set a loading state to indicate operation in progress
-      setIsLoading(true);
+      // Set operation-specific loading state
+      setLoadingStates(prev => ({ ...prev, resettingRoom: true }));
       
       // Add cache-busting timestamp
       const timestamp = Date.now();
@@ -361,6 +396,9 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       console.error('Error resetting room:', err);
       setError('Failed to reset room');
       throw err;
+    } finally {
+      // Clear loading state
+      setLoadingStates(prev => ({ ...prev, resettingRoom: false }));
     }
   };
 
@@ -370,6 +408,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     groups,
     isGroupsFormed,
     isLoading,
+    loadingStates,
     error,
     addParticipant,
     addParticipantManually,

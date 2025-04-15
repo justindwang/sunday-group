@@ -14,6 +14,7 @@ export default function Home() {
     groups, 
     isGroupsFormed,
     isLoading,
+    loadingStates,
     error,
     addParticipantManually, 
     formGroups, 
@@ -37,7 +38,8 @@ export default function Home() {
     }
   };
 
-  if (isLoading) {
+  // Only show loading indicator on initial load
+  if (isLoading && !participants.length && !groups) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6">
         <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
@@ -94,26 +96,42 @@ export default function Home() {
         <div className="flex flex-wrap justify-center gap-4 mb-8">
           <button
             onClick={handleFormGroups}
-            disabled={participants.length < 3 || isGroupsFormed}
+            disabled={
+              participants.length < 3 || 
+              (isGroupsFormed && groups && groups.length > 0) || 
+              loadingStates.formingGroups || 
+              loadingStates.resettingGroups || 
+              loadingStates.resettingRoom
+            }
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Form Groups
+            {loadingStates.formingGroups ? 'Forming Groups...' : 'Form Groups'}
           </button>
           
-          {isGroupsFormed && (
+          {isGroupsFormed && groups && groups.length > 0 && (
             <button
               onClick={() => resetGroups()}
-              className="bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-6 rounded-md"
+              disabled={
+                loadingStates.formingGroups || 
+                loadingStates.resettingGroups || 
+                loadingStates.resettingRoom
+              }
+              className="bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-6 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Reset Groups
+              {loadingStates.resettingGroups ? 'Resetting Groups...' : 'Reset Groups'}
             </button>
           )}
           
           <button
             onClick={() => resetRoom()}
-            className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-md"
+            disabled={
+              loadingStates.formingGroups || 
+              loadingStates.resettingGroups || 
+              loadingStates.resettingRoom
+            }
+            className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Reset Room
+            {loadingStates.resettingRoom ? 'Resetting Room...' : 'Reset Room'}
           </button>
         </div>
         
@@ -123,7 +141,7 @@ export default function Home() {
           </div>
         )}
         
-        {isGroupsFormed && groups && (
+        {isGroupsFormed && groups && groups.length > 0 && (
           <div className="mb-8">
             <GroupDisplay groups={groups} />
           </div>
