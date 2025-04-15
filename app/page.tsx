@@ -88,7 +88,7 @@ export default function Home() {
             <AddParticipantForm onAddParticipant={addParticipantManually} />
           </div>
         </div>
-        
+        g
         <div className="mb-8">
           <ParticipantList participants={participants} />
         </div>
@@ -108,7 +108,7 @@ export default function Home() {
             {loadingStates.formingGroups ? 'Forming Groups...' : 'Form Groups'}
           </button>
           
-          {isGroupsFormed && groups && groups.length > 0 && (
+          {/* {isGroupsFormed && groups && groups.length > 0 && (
             <button
               onClick={() => resetGroups()}
               disabled={
@@ -120,7 +120,7 @@ export default function Home() {
             >
               {loadingStates.resettingGroups ? 'Resetting Groups...' : 'Reset Groups'}
             </button>
-          )}
+          )} */}
           
           <button
             onClick={() => resetRoom()}
