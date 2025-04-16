@@ -33,26 +33,37 @@ export default function ParticipantPageClient({ roomId, participantId }: Partici
     }
   }, [participants, groups, participantId]);
   
-  // Redirect to join page if participant not found for 1 second
+  // Redirect to join page if participant not found for 1 second or if room is reset
   useEffect(() => {
-    // Only check after initial loading is complete and we have participants
-    if (!isLoading && participants.length > 0) {
-      if (!participant) {
-        // Start a timer if one isn't already running
-        if (!redirectTimer && !isRedirecting) {
-          const timer = setTimeout(() => {
-            setIsRedirecting(true);
-            router.push('/join/sunday-group');
-          }, 1000); // Wait 1 second before redirecting
-          
-          setRedirectTimer(timer);
-        }
-      } else {
-        // Clear the timer if participant is found
-        if (redirectTimer) {
-          clearTimeout(redirectTimer);
-          setRedirectTimer(null);
-        }
+    // Skip during initial loading
+    if (isLoading) return;
+    
+    // Conditions to start redirection timer:
+    // 1. Participant not found but participants exist (participant removed)
+    // 2. Participants array is empty (room reset)
+    // 3. Initial load complete but no participants yet
+    const shouldRedirect = 
+      (participants.length > 0 && !participant) || // Participant not found
+      (!isLoading && participants.length === 0);   // Room reset or empty
+    
+    if (shouldRedirect) {
+      // Start a timer if one isn't already running
+      if (!redirectTimer && !isRedirecting) {
+        console.log("Starting redirect timer due to:", 
+          participants.length > 0 ? "Participant not found" : "Room reset or empty");
+        
+        const timer = setTimeout(() => {
+          setIsRedirecting(true);
+          router.push('/join/sunday-group');
+        }, 1000); // Wait 1 second before redirecting
+        
+        setRedirectTimer(timer);
+      }
+    } else {
+      // Clear the timer if conditions no longer met
+      if (redirectTimer) {
+        clearTimeout(redirectTimer);
+        setRedirectTimer(null);
       }
     }
     
