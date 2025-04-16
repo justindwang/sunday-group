@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useRoom } from '../context/RoomContext';
 import GroupDisplay from './GroupDisplay';
 import { Participant, Group } from '../utils/types';
@@ -15,6 +16,8 @@ export default function ParticipantPageClient({ roomId, participantId }: Partici
   const [participant, setParticipant] = useState<Participant | undefined>(undefined);
   const [participantGroup, setParticipantGroup] = useState<Group | undefined>(undefined);
   
+  const router = useRouter();
+  
   // Find the participant and their group
   useEffect(() => {
     const foundParticipant = participants.find(p => p.id === participantId);
@@ -27,6 +30,15 @@ export default function ParticipantPageClient({ roomId, participantId }: Partici
       setParticipantGroup(undefined);
     }
   }, [participants, groups, participantId]);
+  
+  // Redirect to join page if participant not found
+  useEffect(() => {
+    // Only check after initial loading is complete
+    if (!isLoading && participants.length > 0 && !participant) {
+      // Redirect to the join page
+      router.push('/join/sunday-group');
+    }
+  }, [isLoading, participants, participant, router]);
   
   if (isLoading) {
     return (
@@ -57,7 +69,7 @@ export default function ParticipantPageClient({ roomId, participantId }: Partici
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 text-center">
-          Participant not found. Please try joining again.
+          Participant not found. Redirecting to join page...
         </div>
       </div>
     );

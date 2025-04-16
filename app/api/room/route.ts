@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/room
-// Actions: addParticipant, removeParticipant, formGroups, resetGroups, resetRoom
+// Actions: addParticipant, removeParticipant, formGroups, resetGroups, resetRoom, closeRoom
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -133,6 +133,41 @@ export async function POST(request: NextRequest) {
           participants: [],
           groups: null,
           isGroupsFormed: false,
+          isRoomClosed: false,
+          timestamp: Date.now() // Add timestamp for cache busting
+        }, { headers });
+      }
+      
+      case 'closeRoom': {
+        await updateRoomData(roomId, { isRoomClosed: true });
+        
+        // Add cache-busting headers
+        const headers = new Headers();
+        headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        headers.set('Pragma', 'no-cache');
+        headers.set('Expires', '0');
+        headers.set('Surrogate-Control', 'no-store');
+        
+        return NextResponse.json({ 
+          success: true,
+          isRoomClosed: true,
+          timestamp: Date.now() // Add timestamp for cache busting
+        }, { headers });
+      }
+      
+      case 'openRoom': {
+        await updateRoomData(roomId, { isRoomClosed: false });
+        
+        // Add cache-busting headers
+        const headers = new Headers();
+        headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        headers.set('Pragma', 'no-cache');
+        headers.set('Expires', '0');
+        headers.set('Surrogate-Control', 'no-store');
+        
+        return NextResponse.json({ 
+          success: true,
+          isRoomClosed: false,
           timestamp: Date.now() // Add timestamp for cache busting
         }, { headers });
       }

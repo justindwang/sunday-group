@@ -6,6 +6,7 @@ interface RoomData {
   participants: Participant[];
   groups: Group[] | null;
   isGroupsFormed: boolean;
+  isRoomClosed: boolean; // Flag to indicate if the room is closed
   lastUpdated?: number; // Timestamp for cache validation
 }
 
@@ -18,6 +19,7 @@ const defaultRoomData: RoomData = {
   participants: [],
   groups: null,
   isGroupsFormed: false,
+  isRoomClosed: false,
   lastUpdated: Date.now()
 };
 
@@ -84,6 +86,10 @@ export async function updateRoomData(roomId: string, data: Partial<RoomData>): P
     
     if (data.isGroupsFormed !== undefined) {
       updatedData.isGroupsFormed = data.isGroupsFormed;
+    }
+    
+    if (data.isRoomClosed !== undefined) {
+      updatedData.isRoomClosed = data.isRoomClosed;
     }
     
     // Add timestamp
