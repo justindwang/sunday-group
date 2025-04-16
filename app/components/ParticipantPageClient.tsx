@@ -17,6 +17,8 @@ export default function ParticipantPageClient({ roomId, participantId }: Partici
   const [participantGroup, setParticipantGroup] = useState<Group | undefined>(undefined);
   
   const router = useRouter();
+  const [redirectTimer, setRedirectTimer] = useState<NodeJS.Timeout | null>(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   
   // Find the participant and their group
   useEffect(() => {
@@ -31,14 +33,36 @@ export default function ParticipantPageClient({ roomId, participantId }: Partici
     }
   }, [participants, groups, participantId]);
   
-  // Redirect to join page if participant not found
+  // Redirect to join page if participant not found for 1 second
   useEffect(() => {
-    // Only check after initial loading is complete
-    if (!isLoading && participants.length > 0 && !participant) {
-      // Redirect to the join page
-      router.push('/join/sunday-group');
+    // Only check after initial loading is complete and we have participants
+    if (!isLoading && participants.length > 0) {
+      if (!participant) {
+        // Start a timer if one isn't already running
+        if (!redirectTimer && !isRedirecting) {
+          const timer = setTimeout(() => {
+            setIsRedirecting(true);
+            router.push('/join/sunday-group');
+          }, 1000); // Wait 1 second before redirecting
+          
+          setRedirectTimer(timer);
+        }
+      } else {
+        // Clear the timer if participant is found
+        if (redirectTimer) {
+          clearTimeout(redirectTimer);
+          setRedirectTimer(null);
+        }
+      }
     }
-  }, [isLoading, participants, participant, router]);
+    
+    // Cleanup function to clear the timer when component unmounts
+    return () => {
+      if (redirectTimer) {
+        clearTimeout(redirectTimer);
+      }
+    };
+  }, [isLoading, participants, participant, redirectTimer, router, isRedirecting]);
   
   if (isLoading) {
     return (
