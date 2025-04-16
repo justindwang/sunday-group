@@ -122,11 +122,11 @@ function GroupCard({ group, highlightGroupId, testamentColor }: GroupCardProps) 
             >
               <span className="font-medium">{participant.name}</span>
               <div className="flex space-x-2">
-                {participant.isBigGroupLeader && (
+                {/* {participant.isBigGroupLeader && (
                   <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded-full">
                     Sermon Lead
                   </span>
-                )}
+                )} */}
                 {participant.isWillingToLead && (
                   <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full">
                     Small Group Lead

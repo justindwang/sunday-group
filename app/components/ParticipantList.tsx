@@ -56,11 +56,11 @@ export default function ParticipantList({ participants }: ParticipantListProps) 
           >
             <span className="font-medium truncate">{participant.name}</span>
             <div className="flex flex-col space-y-1">
-              {participant.isBigGroupLeader && (
+              {/* {participant.isBigGroupLeader && (
                 <span className="ml-2 text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded-full whitespace-nowrap">
                   Sermon Lead
                 </span>
-              )}
+              )} */}
               {participant.isWillingToLead && (
                 <span className="ml-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full whitespace-nowrap">
                   Small Group Lead

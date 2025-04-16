@@ -83,7 +83,7 @@ export default function JoinPageClient({ roomId }: JoinPageClientProps) {
               </label>
             </div>
             
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               <input
                 type="checkbox"
                 id="isBigGroupLeader"
@@ -95,7 +95,7 @@ export default function JoinPageClient({ roomId }: JoinPageClientProps) {
               <label htmlFor="isBigGroupLeader" className="ml-3 block text-sm">
                 I am leading a sermon discussion today
               </label>
-            </div>
+            </div> */}
           </div>
           
           <button

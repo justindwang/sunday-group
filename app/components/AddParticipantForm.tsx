@@ -76,7 +76,7 @@ export default function AddParticipantForm({ onAddParticipant }: AddParticipantF
             </label>
           </div>
           
-          <div className="flex items-center">
+          {/* <div className="flex items-center">
             <input
               type="checkbox"
               id="isBigGroupLeader"
@@ -88,7 +88,7 @@ export default function AddParticipantForm({ onAddParticipant }: AddParticipantF
             <label htmlFor="isBigGroupLeader" className="ml-2 block text-sm">
               Leading sermon discussion today
             </label>
-          </div>
+          </div> */}
         </div>
         
         <button
