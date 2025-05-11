@@ -7,9 +7,10 @@ interface GroupDisplayProps {
   groups: Group[];
   highlightGroupId?: string;
   hideGroupsHeading?: boolean;
+  isHost?: boolean;
 }
 
-export default function GroupDisplay({ groups, highlightGroupId, hideGroupsHeading = false }: GroupDisplayProps) {
+export default function GroupDisplay({ groups, highlightGroupId, hideGroupsHeading = false, isHost = false }: GroupDisplayProps) {
   if (!groups || groups.length === 0) {
     return (
       <div className="text-center p-8">
@@ -33,6 +34,7 @@ export default function GroupDisplay({ groups, highlightGroupId, hideGroupsHeadi
               group={group} 
               highlightGroupId={highlightGroupId} 
               testamentColor={group.testament === 'old' ? 'amber' : 'blue'}
+              isHost={isHost}
             />
           ))}
         </div>
@@ -56,6 +58,7 @@ export default function GroupDisplay({ groups, highlightGroupId, hideGroupsHeadi
                 group={group} 
                 highlightGroupId={highlightGroupId} 
                 testamentColor="amber"
+                isHost={isHost}
               />
             ))}
           </div>
@@ -71,6 +74,7 @@ export default function GroupDisplay({ groups, highlightGroupId, hideGroupsHeadi
                 group={group} 
                 highlightGroupId={highlightGroupId} 
                 testamentColor="blue"
+                isHost={isHost}
               />
             ))}
           </div>
@@ -84,9 +88,10 @@ interface GroupCardProps {
   group: Group;
   highlightGroupId?: string;
   testamentColor: 'amber' | 'blue';
+  isHost?: boolean;
 }
 
-function GroupCard({ group, highlightGroupId, testamentColor }: GroupCardProps) {
+function GroupCard({ group, highlightGroupId, testamentColor, isHost = false }: GroupCardProps) {
   const borderColor = testamentColor === 'amber' ? 'border-amber-500' : 'border-blue-500';
   const headerBgColor = testamentColor === 'amber' ? 'bg-amber-50 dark:bg-amber-900' : 'bg-blue-50 dark:bg-blue-900';
   
@@ -120,7 +125,12 @@ function GroupCard({ group, highlightGroupId, testamentColor }: GroupCardProps) 
                 ${bgClass}
               `}
             >
-              <span className="font-medium">{participant.name}</span>
+              <span 
+                className="font-medium"
+                title={isHost ? participant.name : undefined}
+              >
+                {participant.name}
+              </span>
               <div className="flex space-x-2">
                 {/* {participant.isBigGroupLeader && (
                   <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded-full">

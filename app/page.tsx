@@ -89,7 +89,7 @@ export default function Home() {
           </div>
         </div>
         <div className="mb-8">
-          <ParticipantList participants={participants} />
+          <ParticipantList participants={participants} isHost={true} />
         </div>
         
         <div className="flex flex-wrap justify-center gap-4 mb-8">
@@ -142,7 +142,7 @@ export default function Home() {
         
         {isGroupsFormed && groups && groups.length > 0 && (
           <div className="mb-8">
-            <GroupDisplay groups={groups} />
+            <GroupDisplay groups={groups} isHost={true} />
           </div>
         )}
       </div>

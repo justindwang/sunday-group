@@ -15,9 +15,10 @@ export function formGroups(participants: Participant[]): Group[] {
   const willingLeaders = participants.filter(p => p.isWillingToLead || p.isBigGroupLeader);
   
   // Calculate how many groups we need
-  const minGroupSize = 3;
-  const maxGroupSize = 8;
+  // Minimum group size is 5 when there are more than 20 participants, otherwise 4
   const totalParticipants = participants.length;
+  const minGroupSize = totalParticipants > 20 ? 5 : 4;
+  const maxGroupSize = 8;
   
   // Calculate min and max number of groups possible based on size constraints
   const maxGroups = Math.floor(totalParticipants / minGroupSize);
@@ -80,12 +81,22 @@ export function formGroups(participants: Participant[]): Group[] {
   // Initialize groups with half Old Testament and half New Testament
   const groups: Group[] = [];
   const halfGroups = numGroups / 2;
+  const usedBookNames = new Set<string>();
   
   for (let i = 0; i < numGroups; i++) {
     const testament = i < halfGroups ? 'old' : 'new';
+    let bookName: string;
+    
+    // Ensure we don't get duplicate group names
+    do {
+      bookName = getRandomBibleBook(testament);
+    } while (usedBookNames.has(bookName));
+    
+    usedBookNames.add(bookName);
+    
     groups.push({
       id: `group-${i + 1}`,
-      name: getRandomBibleBook(testament),
+      name: bookName,
       participants: [],
       hasLeader: false,
       testament: testament
