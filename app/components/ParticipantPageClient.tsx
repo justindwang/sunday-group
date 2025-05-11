@@ -15,6 +15,7 @@ export default function ParticipantPageClient({ roomId, participantId }: Partici
   const { participants, groups, isGroupsFormed, isLoading, error } = useRoom();
   const [participant, setParticipant] = useState<Participant | undefined>(undefined);
   const [participantGroup, setParticipantGroup] = useState<Group | undefined>(undefined);
+  const [showAllGroups, setShowAllGroups] = useState(false);
   
   const router = useRouter();
   const [redirectTimer, setRedirectTimer] = useState<NodeJS.Timeout | null>(null);
@@ -142,6 +143,40 @@ export default function ParticipantPageClient({ roomId, participantId }: Partici
               highlightGroupId={participantGroup.id}
               hideGroupsHeading={true}
             />
+            
+            <div className="mt-8 flex flex-col items-center">
+              <button
+                onClick={() => setShowAllGroups(!showAllGroups)}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+              >
+                <span className="text-sm font-medium">
+                  {showAllGroups ? 'Hide All Groups' : 'Show All Groups'}
+                </span>
+                <div className="relative inline-block w-10 align-middle select-none">
+                  <input 
+                    type="checkbox" 
+                    id="show-all-groups" 
+                    checked={showAllGroups}
+                    readOnly
+                    className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                  />
+                  <label 
+                    htmlFor="show-all-groups" 
+                    className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer ${showAllGroups ? 'bg-blue-500' : 'bg-gray-300'}`}
+                  ></label>
+                </div>
+              </button>
+              
+              {showAllGroups && groups && groups.length > 0 && (
+                <div className="w-full mt-4">
+                  <h3 className="text-xl font-semibold mb-4 text-center">All Groups</h3>
+                  <GroupDisplay 
+                    groups={groups} 
+                    highlightGroupId={participantGroup.id}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <div className="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">

@@ -43,3 +43,23 @@ body {
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Toggle Switch */
+.toggle-checkbox {
+  right: 0;
+  z-index: 5;
+  transition: all 0.3s;
+}
+
+.toggle-checkbox:checked {
+  right: 4px;
+  border-color: #3b82f6;
+}
+
+.toggle-label {
+  transition: background-color 0.3s;
+}
+
+.toggle-checkbox:checked + .toggle-label {
+  background-color: #3b82f6;
+}
